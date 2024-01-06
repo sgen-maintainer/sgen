@@ -138,9 +138,9 @@ class String(Field):
 class Integer(Field):
     """Представление целых чисел"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, precision: int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.precision = 1
+        self.precision = precision
 
     def positive(self):
         super().positive()

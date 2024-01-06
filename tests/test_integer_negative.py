@@ -40,29 +40,29 @@ def test_negative_data_from():
 
 
 def test_range():
-    min_value = -998
-    max_value = 649
+    min_ = -998
+    max_ = 649
 
     field = Integer(
         validate=Range(
-            min_value=min_value, max_value=max_value
+            min=min_, max=max_
         )
     )
 
     negative_data = field.negative()
 
-    assert min_value - 1 in negative_data
-    assert max_value + 1 in negative_data
+    assert min_ - 1 in negative_data
+    assert max_ + 1 in negative_data
 
 
 def test_range_inclusive():
-    min_value = -998
-    max_value = 649
+    min_ = -998
+    max_ = 649
 
     field = Integer(
         validate=Range(
-            min_value=min_value,
-            max_value=max_value,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -72,21 +72,21 @@ def test_range_inclusive():
 
     negative_data = field.negative()
 
-    assert min_value in negative_data
-    assert max_value in negative_data
+    assert min_ in negative_data
+    assert max_ in negative_data
     assert None in negative_data
     assert has_data_type(negative_data, Missing)
 
 
 def test_range_default():
-    min_value = -998
-    max_value = 649
+    min_ = -998
+    max_ = 649
     default = Unique()
 
     field = Integer(
         validate=Range(
-            min_value=min_value,
-            max_value=max_value,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -96,8 +96,8 @@ def test_range_default():
 
     negative_data = field.negative()
 
-    assert min_value in negative_data
-    assert max_value in negative_data
+    assert min_ in negative_data
+    assert max_ in negative_data
     assert None in negative_data
     assert default not in negative_data
 

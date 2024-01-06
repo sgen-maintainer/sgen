@@ -31,8 +31,8 @@ def test_nested_simple():
 
 
 def test_nested_with_validators():
-    field_name = String(allow_none=False, default='Aboba', validate=Length(min_length=10, max_length=40))
-    field_age = Integer(validate=Range(min_value=18, min_inclusive=False))
+    field_name = String(allow_none=False, default='Aboba', validate=Length(min=10, max=40))
+    field_age = Integer(validate=Range(min=18, min_inclusive=False))
     field_balance = Float(allow_none=False, required=True, validate=OneOf(choices=[1, 2, 3, 4, 5]))
     field_is_admin = Boolean(required=True)
     field_keys = Collection(data_type=Integer(), allow_none=False, required=True)

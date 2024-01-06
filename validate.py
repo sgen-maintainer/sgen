@@ -12,36 +12,36 @@ class Length(ValidatorABC):
 
     def __init__(
             self,
-            min_length: int = None,
-            max_length: int = None,
+            min: int = None,
+            max: int = None,
             min_inclusive: bool = True,
             max_inclusive: bool = True,
     ):
         """
         Представляет валидатор длинны коллекции или строки.
 
-        :param min_length: Минимальная длинна.
-        :param max_length: Максимальная длинна.
+        :param min: Минимальная длинна.
+        :param max: Максимальная длинна.
         :param min_inclusive: Включать ли минимальное значение.
         :param max_inclusive: Включать ли максимальное значение.
         """
 
-        if not min_length and not max_length:
-            raise ValueError("Один из параметров min_length, max_length является обязательным")
+        if not min and not max:
+            raise ValueError("Один из параметров min, max является обязательным")
 
-        if isinstance(min_length, int) and isinstance(max_length, int):
-            min_ = min_length if min_inclusive else min_length + 1
-            max_ = max_length if max_inclusive else max_length - 1
+        if isinstance(min, int) and isinstance(max, int):
+            min_ = min if min_inclusive else min + 1
+            max_ = max if max_inclusive else max - 1
 
             if min_ >= max_:
                 raise ValueError("Минимальное значение не может быть больше или равно максимальному")
 
-        self.min_length = min_length
-        self.max_length = max_length
-        if isinstance(min_length, int):
-            self.min_length = min_length if min_inclusive else min_length + 1
-        if isinstance(max_length, int):
-            self.max_length = max_length if max_inclusive else max_length - 1
+        self.min = min
+        self.max = max
+        if isinstance(min, int):
+            self.min = min if min_inclusive else min + 1
+        if isinstance(max, int):
+            self.max = max if max_inclusive else max - 1
 
     def positive(self, data_type: Field) -> List[Any]:
         """
@@ -53,10 +53,10 @@ class Length(ValidatorABC):
 
         values = []
 
-        if self.min_length is not None:
-            values.append(data_type.generate(self.min_length))
-        if self.max_length is not None:
-            values.append(data_type.generate(self.max_length))
+        if self.min is not None:
+            values.append(data_type.generate(self.min))
+        if self.max is not None:
+            values.append(data_type.generate(self.max))
 
         return values
 
@@ -68,17 +68,17 @@ class Length(ValidatorABC):
         :return: List[Any]
         """
 
-        if self.min_length == 0:
+        if self.min == 0:
             raise ValueError(
                 "Неверная длинна коллекции: -1"
             )
 
         values = []
 
-        if self.min_length is not None:
-            values.append(data_type.generate(self.min_length - 1))
-        if self.max_length is not None:
-            values.append(data_type.generate(self.max_length + 1))
+        if self.min is not None:
+            values.append(data_type.generate(self.min - 1))
+        if self.max is not None:
+            values.append(data_type.generate(self.max + 1))
 
         return values
 
@@ -88,33 +88,33 @@ class Range(ValidatorABC):
 
     def __init__(
             self,
-            min_value: int | float = None,
-            max_value: int | float = None,
+            min: int | float = None,
+            max: int | float = None,
             min_inclusive: bool = True,
             max_inclusive: bool = True,
     ):
         """
         Представляет валидатор длинны коллекции или строки.
 
-        :param min_value: Минимальное значение.
-        :param max_value: Максимальное значение.
+        :param min: Минимальное значение.
+        :param max: Максимальное значение.
         :param min_inclusive: Включать ли минимальное значение.
         :param max_inclusive: Включать ли максимальное значение.
         """
 
-        if not min_value and not max_value:
-            raise ValueError("Один из параметров min_value, max_value является обязательным")
+        if not min and not max:
+            raise ValueError("Один из параметров min, max является обязательным")
 
-        if min_value is not None and max_value is not None:
-            if min_value >= max_value:
+        if min is not None and max is not None:
+            if min >= max:
                 raise ValueError("Минимальное значение не может быть больше или равно максимальному")
 
-        self.min_value = min_value
+        self.min = min
         self.min_inclusive = min_inclusive
-        self.max_value = max_value
+        self.max = max
         self.max_inclusive = max_inclusive
 
-    def _get_min_value(self, data_type: Field, positive: bool = True) -> Union[int, float]:
+    def _get_min(self, data_type: Field, positive: bool = True) -> Union[int, float]:
         """
         Возвращает минимально допустимое значение диапазона для указанного тип данных и точности.
 
@@ -125,20 +125,20 @@ class Range(ValidatorABC):
 
         if self.min_inclusive:
             if positive:
-                result = self.min_value
+                result = self.min
             else:
-                result = self.min_value - data_type.get_precision()
+                result = self.min - data_type.get_precision()
         else:
             if positive:
-                result = self.min_value + data_type.get_precision()
+                result = self.min + data_type.get_precision()
             else:
-                result = self.min_value
+                result = self.min
 
         if isinstance(data_type, Float):
             return float(result)
         return result
 
-    def _get_max_value(self, data_type: Field, positive: bool) -> Union[int, float]:
+    def _get_max(self, data_type: Field, positive: bool) -> Union[int, float]:
         """
         Возвращает максимально допустимое значение диапазона для указанного тип данных и точности.
 
@@ -149,14 +149,14 @@ class Range(ValidatorABC):
 
         if self.max_inclusive:
             if positive:
-                result = self.max_value
+                result = self.max
             else:
-                result = self.max_value + data_type.get_precision()
+                result = self.max + data_type.get_precision()
         else:
             if positive:
-                result = self.max_value - data_type.get_precision()
+                result = self.max - data_type.get_precision()
             else:
-                result = self.max_value
+                result = self.max
 
         if isinstance(data_type, Float):
             return float(result)
@@ -172,10 +172,10 @@ class Range(ValidatorABC):
 
         values = []
 
-        if self.min_value is not None:
-            values.append(self._get_min_value(data_type, positive=True))
-        if self.max_value is not None:
-            values.append(self._get_max_value(data_type, positive=True))
+        if self.min is not None:
+            values.append(self._get_min(data_type, positive=True))
+        if self.max is not None:
+            values.append(self._get_max(data_type, positive=True))
 
         return values
 
@@ -189,10 +189,10 @@ class Range(ValidatorABC):
 
         values = []
 
-        if self.min_value is not None:
-            values.append(self._get_min_value(data_type, positive=False))
-        if self.max_value is not None:
-            values.append(self._get_max_value(data_type, positive=False))
+        if self.min is not None:
+            values.append(self._get_min(data_type, positive=False))
+        if self.max is not None:
+            values.append(self._get_max(data_type, positive=False))
 
         return values
 

@@ -43,15 +43,15 @@ def test_simple():
 
 
 def test_length_validator():
-    min_length = 100
-    max_length = 200
+    min_ = 100
+    max_ = 200
 
     for type_ in DATA_TYPES:
         field = Collection(
             data_type=type_[0](allow_none=False, required=True),
             validate=Length(
-                min_length=min_length,
-                max_length=max_length,
+                min=min_,
+                max=max_,
             ),
             allow_none=False,
             required=True,
@@ -74,17 +74,17 @@ def test_length_validator():
             if not isinstance(value, list):
                 continue
 
-            if len(value) == min_length - 1:
+            if len(value) == min_ - 1:
                 has_lower = True
-            elif len(value) == min_length:
+            elif len(value) == min_:
                 has_min = True
                 if isinstance(value[0], type_[2]):
                     has_positive_len_but_wrong_type_min = True
-            elif len(value) == max_length:
+            elif len(value) == max_:
                 has_max = True
                 if isinstance(value[0], type_[2]):
                     has_positive_len_but_wrong_type_max = True
-            elif len(value) == max_length + 1:
+            elif len(value) == max_ + 1:
                 has_biggest = True
 
         assert has_lower and has_min and has_max and has_biggest
@@ -93,15 +93,15 @@ def test_length_validator():
 
 
 def test_length_validator_with_inclusive():
-    min_length = 100
-    max_length = 200
+    min_ = 100
+    max_ = 200
 
     for type_ in DATA_TYPES:
         field = Collection(
             data_type=type_[0](allow_none=False, required=True),
             validate=Length(
-                min_length=min_length,
-                max_length=max_length,
+                min=min_,
+                max=max_,
                 min_inclusive=False,
                 max_inclusive=False,
             ),
@@ -122,17 +122,17 @@ def test_length_validator_with_inclusive():
             if not isinstance(value, list):
                 continue
 
-            if len(value) == min_length:
+            if len(value) == min_:
                 has_lower = True
-            elif len(value) == min_length + 1:
+            elif len(value) == min_ + 1:
                 has_min = True
                 if isinstance(value[0], type_[2]):
                     has_positive_len_but_wrong_type_min = True
-            elif len(value) == max_length - 1:
+            elif len(value) == max_ - 1:
                 has_max = True
                 if isinstance(value[0], type_[2]):
                     has_positive_len_but_wrong_type_max = True
-            elif len(value) == max_length:
+            elif len(value) == max_:
                 has_biggest = True
 
         assert has_lower and has_min and has_max and has_biggest

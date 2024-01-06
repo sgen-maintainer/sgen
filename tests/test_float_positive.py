@@ -50,29 +50,29 @@ def test_positive_data_from():
 
 
 def test_range():
-    min_value = -999.74
-    max_value = 998.39
+    min_ = -999.74
+    max_ = 998.39
 
     field = Float(
         validate=Range(
-            min_value=min_value, max_value=max_value
+            min=min_, max=max_
         )
     )
 
     positive_data = field.positive()
 
-    assert min_value in positive_data
-    assert max_value in positive_data
+    assert min_ in positive_data
+    assert max_ in positive_data
 
 
 def test_range_inclusive():
-    min_value = -999.74
-    max_value = 998.39
+    min_ = -999.74
+    max_ = 998.39
 
     field = Float(
         validate=Range(
-            min_value=min_value,
-            max_value=max_value,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -82,21 +82,21 @@ def test_range_inclusive():
 
     positive_data = field.positive()
 
-    assert min_value + 0.01 in positive_data
-    assert max_value - 0.01 in positive_data
+    assert min_ + 0.01 in positive_data
+    assert max_ - 0.01 in positive_data
     assert None not in positive_data
     assert not has_data_type(positive_data, Missing)
 
 
 def test_range_default():
-    min_value = -999.74
-    max_value = 998.39
+    min_ = -999.74
+    max_ = 998.39
     default = Unique()
 
     field = Float(
         validate=Range(
-            min_value=min_value,
-            max_value=max_value,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -106,8 +106,8 @@ def test_range_default():
 
     positive_data = field.positive()
 
-    assert min_value + 0.01 in positive_data
-    assert max_value - 0.01 in positive_data
+    assert min_ + 0.01 in positive_data
+    assert max_ - 0.01 in positive_data
     assert None not in positive_data
     assert default in positive_data
 

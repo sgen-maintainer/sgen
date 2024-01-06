@@ -41,15 +41,15 @@ def test_simple():
 
 
 def test_length_validator():
-    min_length = 100
-    max_length = 200
+    min_ = 100
+    max_ = 200
 
     for type_ in DATA_TYPES:
         field = Collection(
             data_type=type_[0](allow_none=False, required=True),
             validate=Length(
-                min_length=min_length,
-                max_length=max_length,
+                min=min_,
+                max=max_,
             ),
             allow_none=False,
             required=True,
@@ -63,4 +63,4 @@ def test_length_validator():
 
         for value in field_values:
             if isinstance(value, list):
-                assert len(value) in [min_length, max_length]
+                assert len(value) in [min_, max_]

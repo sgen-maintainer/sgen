@@ -54,24 +54,24 @@ def test_positive_data_from():
 
 
 def test_length():
-    min_length = 999
-    max_length = 1111
+    min_ = 999
+    max_ = 1111
 
-    field = String(validate=Length(min_length=min_length, max_length=max_length))
+    field = String(validate=Length(min=min_, max=max_))
 
     for value in field.positive():
         if isinstance(value, str):
-            assert len(value) in [min_length, max_length]
+            assert len(value) in [min_, max_]
 
 
 def test_length_allow_none_required():
-    min_length = 999
-    max_length = 1111
+    min_ = 999
+    max_ = 1111
 
     field = String(
         validate=Length(
-            min_length=min_length,
-            max_length=max_length,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -83,21 +83,21 @@ def test_length_allow_none_required():
 
     for value in field_values:
         if isinstance(value, str):
-            assert len(value) in [min_length + 1, max_length - 1]
+            assert len(value) in [min_ + 1, max_ - 1]
 
     assert None not in field_values
     assert not has_data_type(field_values, Missing)
 
 
 def test_length_default():
-    min_length = 999
-    max_length = 1111
+    min_ = 999
+    max_ = 1111
     default = Unique()
 
     field = String(
         validate=Length(
-            min_length=min_length,
-            max_length=max_length,
+            min=min_,
+            max=max_,
             min_inclusive=False,
             max_inclusive=False,
         ),
@@ -109,7 +109,7 @@ def test_length_default():
 
     for value in field_values:
         if isinstance(value, str):
-            assert len(value) in [min_length + 1, max_length - 1]
+            assert len(value) in [min_ + 1, max_ - 1]
 
     assert None not in field_values
     assert default in field_values
