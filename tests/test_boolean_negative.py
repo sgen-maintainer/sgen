@@ -40,7 +40,7 @@ def test_negative_data_from():
 
 
 def test_equal():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = Boolean(
         validate=Equal(comparable=comparable)
@@ -48,13 +48,13 @@ def test_equal():
 
     field_values = field.negative()
 
-    assert comparable[0] not in field_values
+    assert comparable not in field_values
     assert None not in field_values
     assert has_data_type(field_values, str)
 
 
 def test_equal_allow_none_and_required():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = Boolean(
         validate=Equal(comparable=comparable),
@@ -64,14 +64,14 @@ def test_equal_allow_none_and_required():
 
     field_values = field.negative()
 
-    assert comparable[0] not in field_values
+    assert comparable not in field_values
     assert None in field_values
     assert has_data_type(field_values, str)
     assert has_data_type(field_values, Missing)
 
 
 def test_equal_default():
-    comparable = [Unique()]
+    comparable = Unique()
     default = Unique()
 
     field = Boolean(

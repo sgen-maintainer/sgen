@@ -102,7 +102,7 @@ def test_length_default():
 
 
 def test_equal():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = String(
         validate=Equal(comparable=comparable)
@@ -110,13 +110,13 @@ def test_equal():
 
     field_values = field.negative()
 
-    assert comparable[0] not in field_values
+    assert comparable not in field_values
     assert None not in field_values
     assert has_data_type(field_values, int)
 
 
 def test_equal_allow_none_required():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = String(
         validate=Equal(comparable=comparable),
@@ -126,7 +126,7 @@ def test_equal_allow_none_required():
 
     field_values = field.negative()
 
-    assert comparable[0] not in field_values
+    assert comparable not in field_values
     assert None in field_values
     assert has_data_type(field_values, int)
     assert has_data_type(field_values, type(None))
@@ -134,7 +134,7 @@ def test_equal_allow_none_required():
 
 
 def test_equal_default():
-    comparable = [Unique()]
+    comparable = Unique()
     default = Unique()
 
     field = String(

@@ -204,7 +204,7 @@ class Equal(ValidatorABC):
         self.comparable = comparable
 
     def positive(self, data_type: Field) -> List[Any]:
-        return self.comparable
+        return [self.comparable]
 
     def negative(self, data_type: Field) -> List[Any]:
         if isinstance(self.comparable, int):

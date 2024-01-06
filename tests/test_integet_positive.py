@@ -110,7 +110,7 @@ def test_range_inclusive():
 
 
 def test_equal():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = Integer(
         validate=Equal(comparable=comparable)
@@ -118,13 +118,13 @@ def test_equal():
 
     field_values = field.positive()
 
-    assert comparable[0] in field_values
+    assert comparable in field_values
     assert None in field_values
     assert has_data_type(field_values, Missing)
 
 
 def test_equal_allow_none_required():
-    comparable = [Unique()]
+    comparable = Unique()
 
     field = Integer(
         validate=Equal(comparable=comparable),
@@ -134,13 +134,13 @@ def test_equal_allow_none_required():
 
     field_values = field.positive()
 
-    assert comparable[0] in field_values
+    assert comparable in field_values
     assert None not in field_values
     assert not has_data_type(field_values, Missing)
 
 
 def test_equal_default():
-    comparable = [Unique()]
+    comparable = Unique()
     default = Unique()
 
     field = Integer(
