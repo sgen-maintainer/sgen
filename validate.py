@@ -7,7 +7,7 @@ from tests import Unique
 
 
 class Length(ValidatorABC):
-    """Ограничивает длину коллекции"""
+    """Limits the length of a collection"""
 
     def __init__(
             self,
@@ -17,23 +17,23 @@ class Length(ValidatorABC):
             max_inclusive: bool = True,
     ):
         """
-        Представляет валидатор длинны коллекции или строки.
+        Initializes the validator
 
-        :param min: Минимальная длинна.
-        :param max: Максимальная длинна.
-        :param min_inclusive: Включать ли минимальное значение.
-        :param max_inclusive: Включать ли максимальное значение.
+        :param min: Minimum length.
+        :param max: Maximum length.
+        :param min_inclusive: True if min is a valid list length
+        :param max_inclusive: True if max is a valid list length
         """
 
         if not min and not max:
-            raise ValueError("Один из параметров min, max является обязательным")
+            raise ValueError("One of the parameters min, max is required")
 
         if isinstance(min, int) and isinstance(max, int):
             min_ = min if min_inclusive else min + 1
             max_ = max if max_inclusive else max - 1
 
             if min_ >= max_:
-                raise ValueError("Минимальное значение не может быть больше или равно максимальному")
+                raise ValueError("The minimum value cannot be greater than or equal to the maximum")
 
         self.min = min
         self.max = max
@@ -44,9 +44,9 @@ class Length(ValidatorABC):
 
     def positive(self, data_type: Field) -> List[Any]:
         """
-        Генерирует позитивный набор данных согласно параметрам валидации.
+        Generates a positive data set according to the validation parameters.
 
-        :param data_type: Тип данных подлежащих валидации.
+        :param data_type: Type of data to be validated.
         :return: List[Any]
         """
 
@@ -61,9 +61,9 @@ class Length(ValidatorABC):
 
     def negative(self, data_type: Field) -> List[Any]:
         """
-        Генерирует негативный набор данных согласно параметрам валидации.
+        Generates a negative data set according to the validation parameters.
 
-        :param data_type: Тип данных подлежащих валидации.
+        :param data_type: Type of data to be validated.
         :return: List[Any]
         """
 
@@ -83,7 +83,7 @@ class Length(ValidatorABC):
 
 
 class Range(ValidatorABC):
-    """Ограничивает диапазон значений числа"""
+    """Limits the range of number values"""
 
     def __init__(
             self,
@@ -93,20 +93,20 @@ class Range(ValidatorABC):
             max_inclusive: bool = True,
     ):
         """
-        Представляет валидатор длинны коллекции или строки.
+        Represents a number value range validator
 
-        :param min: Минимальное значение.
-        :param max: Максимальное значение.
-        :param min_inclusive: Включать ли минимальное значение.
-        :param max_inclusive: Включать ли максимальное значение.
+        :param min: Minimum value.
+        :param max: Maximum value.
+        :param min_inclusive: True if min is within the range of valid number values
+        :param max_inclusive: True if max is within the range of valid number values
         """
 
         if not min and not max:
-            raise ValueError("Один из параметров min, max является обязательным")
+            raise ValueError("One of the parameters min, max is required")
 
         if min is not None and max is not None:
             if min >= max:
-                raise ValueError("Минимальное значение не может быть больше или равно максимальному")
+                raise ValueError("The minimum value cannot be greater than or equal to the maximum")
 
         self.min = min
         self.min_inclusive = min_inclusive
@@ -115,11 +115,11 @@ class Range(ValidatorABC):
 
     def _get_min(self, data_type: Field, positive: bool = True) -> Union[int, float]:
         """
-        Возвращает минимально допустимое значение диапазона для указанного тип данных и точности.
+        Returns the minimum acceptable range value for the specified data type.
 
-        :param data_type: Тип данных.
-        :param positive: Позитивное или негативное значение.
-        :return: Минимальная граница диапазона.
+        :param data_type: Data type.
+        :param positive: Positive or negative value.
+        :return: Minimum range limit.
         """
 
         if self.min_inclusive:
@@ -139,11 +139,11 @@ class Range(ValidatorABC):
 
     def _get_max(self, data_type: Field, positive: bool) -> Union[int, float]:
         """
-        Возвращает максимально допустимое значение диапазона для указанного тип данных и точности.
+        Returns the maximum allowed range value for the specified data type.
 
-        :param data_type: Тип данных.
-        :param positive: Позитивное или негативное значение.
-        :return: Максимальная граница диапазона.
+        :param data_type: Data type.
+        :param positive: Positive or negative value.
+        :return: Maximum range limit.
         """
 
         if self.max_inclusive:
@@ -163,9 +163,9 @@ class Range(ValidatorABC):
 
     def positive(self, data_type: Field) -> List[Any]:
         """
-        Генерирует позитивный набор данных согласно параметрам валидации.
+        Generates a positive data set according to the validation parameters.
 
-        :param data_type: Тип данных подлежащих валидации.
+        :param data_type: Type of data to be validated.
         :return: List[Any]
         """
 
@@ -180,9 +180,9 @@ class Range(ValidatorABC):
 
     def negative(self, data_type: Field) -> List[Any]:
         """
-        Генерирует негативный набор данных согласно параметрам валидации.
+        Generates a negative data set according to the validation parameters.
 
-        :param data_type: Тип данных подлежащих валидации.
+        :param data_type: Type of data to be validated.
         :return: List[Any]
         """
 
@@ -197,7 +197,7 @@ class Range(ValidatorABC):
 
 
 class Equal(ValidatorABC):
-    """Проверяет на равенство"""
+    """Tests for equality"""
 
     def __init__(self, comparable: Any):
         self.comparable = comparable
@@ -213,7 +213,7 @@ class Equal(ValidatorABC):
 
 
 class OneOf(ValidatorABC):
-    """Проверяет на принадлежность к множеству choices"""
+    """Checks for membership in the choices set"""
 
     def __init__(self, choices: List[Any]):
         self.choices = choices
@@ -229,9 +229,8 @@ class OneOf(ValidatorABC):
                 result += [Unique()]
                 continue
             while True:
-                # Переданный параметр data_type=Integer() не играет никакой роли. Недостаток архитектуры (?)
                 new_value = data_type.get_other_value(value=value)
-                # Проверка на случайное попадание в одно из значений choices
+                # Checking for a random hit in one of the choices values
                 if new_value not in self.choices:
                     result += [new_value]
                     break
@@ -240,7 +239,7 @@ class OneOf(ValidatorABC):
 
 
 class NoneOf(ValidatorABC):
-    """Проверяет на непринадлежность к множеству choices"""
+    """Checks for non-membership in the set of choices"""
 
     def __init__(self, invalid_values: List[Any]):
         self.invalid_values = invalid_values
@@ -253,9 +252,8 @@ class NoneOf(ValidatorABC):
                 result += [Unique()]
                 continue
             while True:
-                # Переданный параметр data_type=Integer() не играет никакой роли. Недостаток архитектуры (?)
                 valid_value = data_type.get_other_value(value=value)
-                # Проверка на случайное попадание в одно из значений invalid_values
+                # Checking for a random hit in one of the invalid_values
                 if valid_value not in self.invalid_values:
                     result += [valid_value]
                     break

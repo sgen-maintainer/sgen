@@ -1,4 +1,4 @@
-from typing import Iterable, Callable, Any, List, Union
+from typing import Iterable, Callable, Any, List, Union, Optional
 from string import ascii_letters
 from random import choice, randint
 from datetime import datetime, date, timedelta
@@ -8,7 +8,7 @@ from utils import is_iterable_but_not_string, Missing, ValuesStorage
 
 
 class Field(FieldABC):
-    """Базовый класс для типов данных"""
+    """Base class for data types"""
 
     def __init__(
         self,
@@ -28,12 +28,12 @@ class Field(FieldABC):
         elif callable(validate) or isinstance(validate, ValidatorABC):
             self.validators = [validate]
         elif is_iterable_but_not_string(validate):
-            raise NotImplemented("На данный момент несколько валидаторов не поддерживаются")
+            raise NotImplemented("Currently several validators are not supported")
 
         if (positive_data_from or negative_data_from) and default:
-            raise ValueError("Параметры data_from и default не могут быть переданы одновременно")
+            raise ValueError("The data_from and default parameters cannot be passed simultaneously")
         if required and default:
-            raise ValueError("Параметры data_from и default не могут быть переданы одновременно")
+            raise ValueError("The required and default parameters cannot be passed simultaneously")
 
         self.positive_data_from = positive_data_from
         self.negative_data_from = negative_data_from
@@ -78,25 +78,31 @@ class Field(FieldABC):
             self._register(Missing())
 
     def generate(self, length):
+        """Implement this method for the Length validator to work correctly"""
+
         raise NotImplemented(
-            "Для возможности работы валидатора Length с итерируемыми типами данных"
-            "необходимо реализовать метод generate, который вернет коллекцию длинны length"
+            "To allow the Length validator to work with iterable data types"
+            "you need to implement the generate method, which will return a collection of length length"
         )
 
     def get_step(self):
+        """Implement this method for the Range validator to work correctly"""
+
         raise NotImplemented(
-            "Для возможности работы валидатора Range с числовыми типами данных"
-            "необходимо реализовать метод get_step, который вернет минимальный шаг для числового типа"
+            "To allow the Range validator to work with numeric data types"
+            "you need to implement a get_step method that will return the step for a numeric data type"
         )
 
     def get_other_value(self, value: Any):
+        """Реализуйте этот метод для корректной работы валидаторов Equal, OneOf и NoneOf"""
+
         raise NotImplemented(
-            "Для возможности работы валидаторов Equal, OneOf и NoneOf необходимо"
-            "реализовать метод get_other_value, который вернет значение не равное comparable"
+            "For the Equal, OneOf and NoneOf validators to work, you need"
+            "implement the get_other_value method, which will return a value not equal to value"
         )
 
     def _register(self, for_register: Union[Any, List[Any]]):
-        """Добавляет новое значение/значения в список значений поля если оно еще не представлено"""
+        """Adds a new value/values to the field's list of values if it is not already present"""
 
         if isinstance(for_register, list):
             for value in for_register:
@@ -108,9 +114,9 @@ class Field(FieldABC):
 
 
 class String(Field):
-    """Представление строк"""
+    """String representation"""
 
-    def positive(self) -> List[Union[str, None]]:
+    def positive(self) -> List[Union[None, Missing, str]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -121,7 +127,7 @@ class String(Field):
 
         return self.values
 
-    def negative(self) -> List[Union[str, None, Missing]]:
+    def negative(self) -> List[Union[None, Missing, str, int]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -133,28 +139,28 @@ class String(Field):
 
     def generate(self, length: int):
         """
-        Генерирует строку указанной длинны.
+        Generates a string of the specified length.
 
-        :param length: Длинна строки.
-        :return: Строка.
+        :param length: String length.
+        :return: String.
         """
 
         return ''.join(choice(ascii_letters) for _ in range(length))
 
-    def get_other_value(self, value: str) -> str:
+    def get_other_value(self, value: Optional[str]) -> str:
         if value is None:
             return 'not_comparable'
         return 'not_' + value
 
 
 class Integer(Field):
-    """Представление целых чисел"""
+    """Integer representation"""
 
     def __init__(self, step: int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.step = step
 
-    def positive(self):
+    def positive(self) -> List[Union[None, Missing, int]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -165,7 +171,7 @@ class Integer(Field):
 
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Union[None, Missing, int, str]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -180,20 +186,20 @@ class Integer(Field):
     def get_step(self):
         return self.step
 
-    def get_other_value(self, value: int) -> int:
+    def get_other_value(self, value: Optional[int]) -> int:
         if value is None:
             return randint(10, 100000)
         return value + randint(10, 100000)
 
 
 class Float(Field):
-    """Представление чисел с плавающей точкой"""
+    """Floating point representation"""
 
     def __init__(self, step: float = 0.01, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.step = step
 
-    def positive(self):
+    def positive(self) -> List[Union[None, Missing, float]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -204,7 +210,7 @@ class Float(Field):
 
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Union[None, Missing, float, str]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -219,16 +225,16 @@ class Float(Field):
     def get_step(self):
         return self.step
 
-    def get_other_value(self, value: float) -> float:
+    def get_other_value(self, value: Optional[float]) -> float:
         if value is None:
             return randint(1000000, 100000000) / 100
         return value + randint(1000000, 100000000) / 100
 
 
 class Boolean(Field):
-    """Представление логического типа"""
+    """Boolean type representation"""
 
-    def positive(self):
+    def positive(self) -> List[Union[None, Missing, bool]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -239,7 +245,7 @@ class Boolean(Field):
 
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Union[None, Missing, bool, str]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -251,20 +257,20 @@ class Boolean(Field):
 
         return self.values
 
-    def get_other_value(self, value: bool) -> bool:
+    def get_other_value(self, value: Optional[bool]) -> bool:
         if value is None:
             return True
         return not value
 
 
 class DateTime(Field):
-    """Представление типа datetime"""
+    """Datetime type representation"""
 
     def __init__(self, step: timedelta = timedelta(days=1), *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.step = step
 
-    def positive(self):
+    def positive(self) -> List[Union[None, Missing, datetime]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -275,7 +281,7 @@ class DateTime(Field):
 
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Union[None, Missing, datetime, str]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -285,23 +291,23 @@ class DateTime(Field):
 
         return self.values
 
-    def get_step(self):
+    def get_step(self) -> timedelta:
         return self.step
 
-    def get_other_value(self, value: datetime) -> datetime:
+    def get_other_value(self, value: Optional[datetime]) -> datetime:
         if value is None:
             return datetime.now()
         return value + timedelta(days=randint(1, 365), minutes=randint(1, 60))
 
 
 class Date(Field):
-    """Представление типа date"""
+    """Date type representation"""
 
     def __init__(self, step: timedelta = timedelta(days=1), *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.step = step
 
-    def positive(self):
+    def positive(self) -> List[Union[None, Missing, date]]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -312,7 +318,7 @@ class Date(Field):
 
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Union[None, Missing, date, str]]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -332,13 +338,13 @@ class Date(Field):
 
 
 class Collection(Field):
-    """Представление списков"""
+    """List view"""
 
-    def __init__(self, data_type: FieldABC, *args, **kwargs):
+    def __init__(self, data_type: Union[FieldABC, 'SGen'], *args, **kwargs):
         """
-        Инициализирует коллекцию, добавляя в нее новый параметр data_type
+        Initializes the collection by adding a new data_type parameter to it
 
-        :param data_type: Тип данных для коллекции
+        :param data_type: Collection data type
         """
 
         super().__init__(*args, **kwargs)
@@ -347,15 +353,15 @@ class Collection(Field):
 
     def _register(self, for_register: Union[Any, List[Any]]):
         """
-        Добавляет новое значение/значения в список значений поля если оно еще не представлено
-        Дополнительно очищает списки от значения Missing, так как делать это на уровне класса SGen запарно
+        Adds a new value/values to the field's list of values if it is not already present
+        Additionally, it clears lists of the Missing value, since doing this at the SGen class level is inconvenient
 
-        :param for_register: Регистрируемое значение или список регистрируемых значений
+        :param for_register: Adds a value or list of logged values
         """
 
         if isinstance(for_register, list):
             self.values.extend([
-                list(filter(lambda item: not isinstance(item, Missing), value))  # Фильтруем Missing внутри списков
+                list(filter(lambda item: not isinstance(item, Missing), value))  # Filtering Missing within lists
                 for value in for_register
                 if list(filter(lambda item: not isinstance(item, Missing), value)) or not self.validators
             ])
@@ -363,7 +369,7 @@ class Collection(Field):
             if for_register not in self.values:
                 self.values.append(for_register)
 
-    def positive(self):
+    def positive(self) -> List[Any]:
         super().positive()
 
         if self.positive_data_from is not None:
@@ -381,7 +387,7 @@ class Collection(Field):
                 self._register([[value for _ in range(randint(1, 5))]])
         return self.values
 
-    def negative(self):
+    def negative(self) -> List[Any]:
         super().negative()
 
         if self.negative_data_from is not None:
@@ -405,7 +411,7 @@ class Collection(Field):
 
         return self.values
 
-    def generate(self, length):
+    def generate(self, length: int) -> List[Any]:
         return [
             [allowed_value for _ in range(length)]
             for allowed_value in self.inner_values
@@ -418,13 +424,13 @@ class Collection(Field):
 
 
 class Nested(Field):
-    """Представление сущностей"""
+    """Entity View"""
 
     def __init__(self, data_type: 'SGen', *args, **kwargs):
         """
-        Инициализирует вложенную схему, добавляя в нее новый параметр data_type
+        Initializes a nested schema by adding a new data_type parameter to it
 
-        :param data_type: Тип данных для схемы
+        :param data_type: Schema data type
         """
 
         super().__init__(*args, **kwargs)

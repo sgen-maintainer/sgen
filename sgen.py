@@ -7,16 +7,14 @@ from utils import Missing
 
 
 class SGen:
-    """
-    Класс для генерации тестовых структур данных.
-    """
+    """Class for generating test data structures."""
 
     def fields(self, is_positive: bool) -> List[SchemaField]:
         """
-        Возвращает список полей схемы и генераторы данных для них.
+        Returns a list of schema fields and data generators for them.
 
-        :param is_positive: True если надо вернуть позитивные генераторы.
-        :return: Список SchemaField.
+        :param is_positive: True if you need to return positive generators.
+        :return: List of SchemaField.
         """
 
         method = 'positive' if is_positive else 'negative'
@@ -33,10 +31,10 @@ class SGen:
 
     def _generate(self, fields: List[SchemaField]):
         """
-        Генерирует декартово произведение значений полей.
+        Generates a Cartesian product of field values.
 
-        :param fields: Список полей.
-        :return: Генератор.
+        :param fields: List of fields.
+        :return: Generator.
         """
 
         if len(fields) == 1:
@@ -49,9 +47,9 @@ class SGen:
 
     def positive(self):
         """
-        Генерирует набор позитивных тестовых данных.
+        Generates a set of positive test data.
 
-        :return: Генератор словарей.
+        :return: Dictionary generator.
         """
 
         for dataset in self._generate(fields=self.fields(is_positive=True)):
@@ -62,9 +60,9 @@ class SGen:
 
     def negative(self):
         """
-        Генерирует набор негативных тестовых данных.
+        Generates a set of negative test data.
 
-        :return: Список словарей.
+        :return: List of dictionaries.
         """
 
         positive_generators = self.fields(is_positive=True)
