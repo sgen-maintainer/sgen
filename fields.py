@@ -1,6 +1,7 @@
 from typing import Iterable, Callable, Any, List, Union
 from string import ascii_letters
 from random import choice, randint
+from datetime import datetime, date, timedelta
 
 from base import FieldABC, ValidatorABC
 from utils import is_iterable_but_not_string, Missing, ValuesStorage
@@ -82,10 +83,16 @@ class Field(FieldABC):
             "необходимо реализовать метод generate, который вернет коллекцию длинны length"
         )
 
-    def get_precision(self):
+    def get_step(self):
         raise NotImplemented(
             "Для возможности работы валидатора Range с числовыми типами данных"
-            "необходимо реализовать метод get_precision, который вернет минимальный шаг для числового типа"
+            "необходимо реализовать метод get_step, который вернет минимальный шаг для числового типа"
+        )
+
+    def get_other_value(self, value: Any):
+        raise NotImplemented(
+            "Для возможности работы валидаторов Equal, OneOf и NoneOf необходимо"
+            "реализовать метод get_other_value, который вернет значение не равное comparable"
         )
 
     def _register(self, for_register: Union[Any, List[Any]]):
@@ -134,13 +141,18 @@ class String(Field):
 
         return ''.join(choice(ascii_letters) for _ in range(length))
 
+    def get_other_value(self, value: str) -> str:
+        if value is None:
+            return 'not_comparable'
+        return 'not_' + value
+
 
 class Integer(Field):
     """Представление целых чисел"""
 
-    def __init__(self, precision: int = 1, *args, **kwargs):
+    def __init__(self, step: int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.precision = precision
+        self.step = step
 
     def positive(self):
         super().positive()
@@ -165,16 +177,21 @@ class Integer(Field):
 
         return self.values
 
-    def get_precision(self):
-        return self.precision
+    def get_step(self):
+        return self.step
+
+    def get_other_value(self, value: int) -> int:
+        if value is None:
+            return randint(10, 100000)
+        return value + randint(10, 100000)
 
 
 class Float(Field):
     """Представление чисел с плавающей точкой"""
 
-    def __init__(self, precision: float = 0.01, *args, **kwargs):
+    def __init__(self, step: float = 0.01, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.precision = precision
+        self.step = step
 
     def positive(self):
         super().positive()
@@ -199,8 +216,13 @@ class Float(Field):
 
         return self.values
 
-    def get_precision(self):
-        return self.precision
+    def get_step(self):
+        return self.step
+
+    def get_other_value(self, value: float) -> float:
+        if value is None:
+            return randint(1000000, 100000000) / 100
+        return value + randint(1000000, 100000000) / 100
 
 
 class Boolean(Field):
@@ -228,6 +250,85 @@ class Boolean(Field):
         )
 
         return self.values
+
+    def get_other_value(self, value: bool) -> bool:
+        if value is None:
+            return True
+        return not value
+
+
+class DateTime(Field):
+    """Представление типа datetime"""
+
+    def __init__(self, step: timedelta = timedelta(days=1), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.step = step
+
+    def positive(self):
+        super().positive()
+
+        if self.positive_data_from is not None:
+            return self.values
+
+        if not self.validators:
+            self._register(datetime.now())
+
+        return self.values
+
+    def negative(self):
+        super().negative()
+
+        if self.negative_data_from is not None:
+            return self.values
+
+        self._register('not_datetime')
+
+        return self.values
+
+    def get_step(self):
+        return self.step
+
+    def get_other_value(self, value: datetime) -> datetime:
+        if value is None:
+            return datetime.now()
+        return value + timedelta(days=randint(1, 365), minutes=randint(1, 60))
+
+
+class Date(Field):
+    """Представление типа date"""
+
+    def __init__(self, step: timedelta = timedelta(days=1), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.step = step
+
+    def positive(self):
+        super().positive()
+
+        if self.positive_data_from is not None:
+            return self.values
+
+        if not self.validators:
+            self._register(datetime.now().date())
+
+        return self.values
+
+    def negative(self):
+        super().negative()
+
+        if self.negative_data_from is not None:
+            return self.values
+
+        self._register('not_date')
+
+        return self.values
+
+    def get_step(self):
+        return self.step
+
+    def get_other_value(self, value: date) -> date:
+        if value is None:
+            return datetime.now().date()
+        return value + timedelta(days=randint(1, 365))
 
 
 class Collection(Field):
@@ -309,6 +410,11 @@ class Collection(Field):
             [allowed_value for _ in range(length)]
             for allowed_value in self.inner_values
         ]
+
+    def get_other_value(self, value: list) -> list:
+        if value is None:
+            return [self.data_type.get_other_value(value=value)]
+        return value * 2
 
 
 class Nested(Field):

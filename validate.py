@@ -1,9 +1,8 @@
 from typing import List, Any, Union
-from random import randint
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date
 
 from base import ValidatorABC
-from fields import Integer, Float, Field
+from fields import Float, Field
 from tests import Unique
 
 
@@ -88,8 +87,8 @@ class Range(ValidatorABC):
 
     def __init__(
             self,
-            min: int | float = None,
-            max: int | float = None,
+            min: int | float | datetime | date = None,
+            max: int | float | datetime | date = None,
             min_inclusive: bool = True,
             max_inclusive: bool = True,
     ):
@@ -127,10 +126,10 @@ class Range(ValidatorABC):
             if positive:
                 result = self.min
             else:
-                result = self.min - data_type.get_precision()
+                result = self.min - data_type.get_step()
         else:
             if positive:
-                result = self.min + data_type.get_precision()
+                result = self.min + data_type.get_step()
             else:
                 result = self.min
 
@@ -151,10 +150,10 @@ class Range(ValidatorABC):
             if positive:
                 result = self.max
             else:
-                result = self.max + data_type.get_precision()
+                result = self.max + data_type.get_step()
         else:
             if positive:
-                result = self.max - data_type.get_precision()
+                result = self.max - data_type.get_step()
             else:
                 result = self.max
 
@@ -207,24 +206,10 @@ class Equal(ValidatorABC):
         return [self.comparable]
 
     def negative(self, data_type: Field) -> List[Any]:
-        if isinstance(self.comparable, int):
-            return [self.comparable + randint(10, 100000)]
-        elif isinstance(self.comparable, float):
-            return [self.comparable + randint(1000000, 100000000) / 100]
-        elif isinstance(self.comparable, str):
-            return ['not_' + self.comparable]
-        elif isinstance(self.comparable, bool):
-            return [not self.comparable]
-        elif isinstance(self.comparable, list):
-            return [self.comparable * 2]
-        elif isinstance(self.comparable, time) or isinstance(self.comparable, datetime):
-            return [self.comparable + timedelta(minutes=randint(10, 100))]
-        elif isinstance(self.comparable, date):
-            return [self.comparable + timedelta(days=randint(10, 100))]
-        elif isinstance(self.comparable, Unique):
+        if isinstance(self.comparable, Unique):
             return [Unique()]
         else:
-            raise TypeError(f"Неизвестный тип данных {self.comparable}")
+            return [data_type.get_other_value(value=self.comparable)]
 
 
 class OneOf(ValidatorABC):
@@ -240,12 +225,15 @@ class OneOf(ValidatorABC):
         result = []
 
         for value in self.choices:
+            if isinstance(value, Unique):
+                result += [Unique()]
+                continue
             while True:
                 # Переданный параметр data_type=Integer() не играет никакой роли. Недостаток архитектуры (?)
-                new_value = Equal(comparable=value).negative(data_type=Integer())
+                new_value = data_type.get_other_value(value=value)
                 # Проверка на случайное попадание в одно из значений choices
-                if new_value[0] not in self.choices:
-                    result += new_value
+                if new_value not in self.choices:
+                    result += [new_value]
                     break
 
         return result
@@ -261,12 +249,15 @@ class NoneOf(ValidatorABC):
         result = []
 
         for value in self.invalid_values:
+            if isinstance(value, Unique):
+                result += [Unique()]
+                continue
             while True:
                 # Переданный параметр data_type=Integer() не играет никакой роли. Недостаток архитектуры (?)
-                valid_value = Equal(comparable=value).negative(data_type=Integer())
+                valid_value = data_type.get_other_value(value=value)
                 # Проверка на случайное попадание в одно из значений invalid_values
-                if valid_value[0] not in self.invalid_values:
-                    result += valid_value
+                if valid_value not in self.invalid_values:
+                    result += [valid_value]
                     break
 
         return result

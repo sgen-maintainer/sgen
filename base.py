@@ -12,11 +12,7 @@ class FieldABC(ABC):
         pass
 
     @abstractmethod
-    def generate(self, length):  # Необходимо реализовывать только у итерируемых типов данных
-        pass
-
-    @abstractmethod
-    def get_precision(self):  # Необходимо реализовывать только у числовых типов данных
+    def get_other_value(self, value: Any):
         pass
 
 
